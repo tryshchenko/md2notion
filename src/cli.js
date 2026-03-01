@@ -5,6 +5,7 @@ const path = require('path');
 const { extractTitle, parseMarkdownToBlocks } = require('./parser');
 const { createImageHandler } = require('./images');
 const { createClient, createPage, listAccessiblePages } = require('./notion-client');
+const log = require('./log');
 
 const HELP = `
 Usage: md2notion <file.md> --api-key <key> --page-id <id> [options]
@@ -50,6 +51,32 @@ function parseArgs(argv) {
 }
 
 /**
+ * Format and print list-pages results.
+ */
+function printAccessiblePages({ pages, databases }) {
+  if (pages.length === 0) {
+    log.info('No accessible pages found.');
+    log.info('Ensure the integration is connected: open a Notion page > ... > Add connections.');
+    return;
+  }
+
+  log.info(`Found ${pages.length} accessible page(s):\n`);
+  for (const page of pages) {
+    console.log(`  ${page.title}`);
+    console.log(`    ID:  ${page.id}`);
+    console.log(`    URL: ${page.url}\n`);
+  }
+
+  if (databases.length > 0) {
+    log.info(`Found ${databases.length} accessible database(s):\n`);
+    for (const db of databases) {
+      console.log(`  ${db.title}`);
+      console.log(`    ID:  ${db.id}\n`);
+    }
+  }
+}
+
+/**
  * Main CLI entry point.
  */
 async function run(argv) {
@@ -61,7 +88,7 @@ async function run(argv) {
   }
 
   if (!opts.apiKey) {
-    console.error('Error: --api-key is required');
+    log.error('--api-key is required');
     console.log('\n' + HELP);
     process.exit(1);
   }
@@ -69,18 +96,19 @@ async function run(argv) {
   // List pages mode
   if (opts.listPages) {
     const notion = createClient(opts.apiKey);
-    await listAccessiblePages(notion);
+    const result = await listAccessiblePages(notion);
+    printAccessiblePages(result);
     return;
   }
 
   if (!opts.file) {
-    console.error('Error: markdown file path is required');
+    log.error('Markdown file path is required');
     console.log('\n' + HELP);
     process.exit(1);
   }
 
   if (!opts.pageId) {
-    console.error('Error: --page-id is required');
+    log.error('--page-id is required');
     console.log('\n' + HELP);
     process.exit(1);
   }
@@ -88,7 +116,7 @@ async function run(argv) {
   // Read markdown
   const filePath = path.resolve(opts.file);
   if (!fs.existsSync(filePath)) {
-    console.error(`Error: file not found: ${filePath}`);
+    log.error(`File not found: ${filePath}`);
     process.exit(1);
   }
 
@@ -99,33 +127,30 @@ async function run(argv) {
   const title = opts.title || extractTitle(markdown) || path.basename(filePath, path.extname(filePath));
 
   if (opts.dryRun) {
-    // Dry run: parse without uploading images
-    console.log(`Parsing ${opts.file}...`);
     const blocks = await parseMarkdownToBlocks(markdown, { baseDir });
-    console.log(`Title: ${title}`);
-    console.log(`Blocks: ${blocks.length}`);
-    console.log(`Lines: ${markdown.split('\n').length}`);
+    log.info(`Title:  ${title}`);
+    log.info(`Blocks: ${blocks.length}`);
+    log.info(`Lines:  ${markdown.split('\n').length}`);
     return;
   }
 
   // Full upload
   const notion = createClient(opts.apiKey);
 
-  // Launch browser for SVG conversion
-  console.log('Launching browser for image conversion...');
+  log.info('Starting browser for image conversion...');
   const puppeteer = require('puppeteer');
   const browser = await puppeteer.launch({ headless: true });
   const onImage = createImageHandler(notion, browser);
 
-  console.log(`Parsing ${opts.file}...`);
+  log.info(`Parsing ${path.basename(filePath)}...`);
   const blocks = await parseMarkdownToBlocks(markdown, { baseDir, onImage });
-  console.log(`  ${blocks.length} blocks`);
+  log.info(`Parsed ${blocks.length} blocks`);
 
   await browser.close();
 
-  console.log(`\nCreating page: "${title}"...`);
+  log.info(`Creating page: "${title}"...`);
   const page = await createPage(notion, opts.pageId, title, blocks);
-  console.log(`\nDone! ${page.url}`);
+  log.info(`Page created: ${page.url}`);
 }
 
 module.exports = { parseArgs, run, HELP };

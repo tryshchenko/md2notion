@@ -67,7 +67,7 @@ describe('CLI --dry-run integration', () => {
     }
 
     const output = logs.join('\n');
-    assert.ok(output.includes('Title: Sample Report'), `Expected title in output, got: ${output}`);
+    assert.ok(output.includes('Sample Report'), `Expected title in output, got: ${output}`);
     assert.ok(output.includes('Blocks:'), `Expected block count in output, got: ${output}`);
   });
 });
