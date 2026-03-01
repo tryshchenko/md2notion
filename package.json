@@ -1,6 +1,6 @@
 {
   "name": "md2notion",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Upload Markdown files to Notion as pages",
   "main": "src/index.js",
   "bin": {
@@ -12,7 +12,7 @@
   "keywords": ["markdown", "notion", "upload", "cli"],
   "license": "MIT",
   "dependencies": {
-    "@notionhq/client": "^2.2.0",
+    "@notionhq/client": "^5.0.0",
     "puppeteer": "^24.0.0"
   }
 }
