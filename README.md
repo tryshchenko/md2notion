@@ -1,11 +1,11 @@
-# marktion
+# md2notion
 
 Upload Markdown files to Notion as pages. Handles tables, headings, bold/italic formatting, images (SVG→PNG conversion), and large documents (batch upload).
 
 ## Usage
 
 ```bash
-npx marktion <file.md> --api-key <key> --page-id <id> [options]
+npx md2notion <file.md> --api-key <key> --page-id <id> [options]
 ```
 
 ### Options
@@ -23,19 +23,19 @@ npx marktion <file.md> --api-key <key> --page-id <id> [options]
 
 ```bash
 # Upload a markdown file
-npx marktion report.md --api-key ntn_xxx --page-id abc-123
+npx md2notion report.md --api-key ntn_xxx --page-id abc-123
 
 # Dry run to check parsing
-npx marktion report.md --api-key ntn_xxx --page-id abc-123 --dry-run
+npx md2notion report.md --api-key ntn_xxx --page-id abc-123 --dry-run
 
 # List accessible pages
-npx marktion --api-key ntn_xxx --list-pages
+npx md2notion --api-key ntn_xxx --list-pages
 ```
 
 ## Programmatic API
 
 ```js
-const { parseMarkdownToBlocks, extractTitle, createClient, createPage } = require('marktion');
+const { parseMarkdownToBlocks, extractTitle, createClient, createPage } = require('md2notion');
 
 const markdown = fs.readFileSync('report.md', 'utf8');
 const blocks = await parseMarkdownToBlocks(markdown, { baseDir: './reports' });

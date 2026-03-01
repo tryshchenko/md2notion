@@ -86,7 +86,7 @@ describe('CLI --help', () => {
     }
 
     const output = logs.join('\n');
-    assert.ok(output.includes('Usage: marktion'));
+    assert.ok(output.includes('Usage: md2notion'));
     assert.ok(output.includes('--api-key'));
     assert.ok(output.includes('--page-id'));
     assert.ok(output.includes('--dry-run'));

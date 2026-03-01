@@ -7,7 +7,7 @@ const { createImageHandler } = require('./images');
 const { createClient, createPage, listAccessiblePages } = require('./notion-client');
 
 const HELP = `
-Usage: marktion <file.md> --api-key <key> --page-id <id> [options]
+Usage: md2notion <file.md> --api-key <key> --page-id <id> [options]
 
 Arguments:
   file           Path to markdown file (required, positional)

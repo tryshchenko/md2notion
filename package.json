@@ -1,10 +1,10 @@
 {
-  "name": "marktion",
+  "name": "md2notion",
   "version": "1.0.0",
   "description": "Upload Markdown files to Notion as pages",
   "main": "src/index.js",
   "bin": {
-    "marktion": "bin/marktion.js"
+    "md2notion": "bin/marktion.js"
   },
   "scripts": {
     "test": "node --test test/*.test.js"
