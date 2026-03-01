@@ -54,24 +54,20 @@ describe('batchAppendBlocks via mock', () => {
 });
 
 describe('listAccessiblePages via mock', () => {
-  it('returns pages and databases', async () => {
+  it('returns structured pages and databases', async () => {
     const { notion, calls } = createMockNotion();
+    const { listAccessiblePages } = require('../src/notion-client');
 
-    const pageResponse = await notion.search({
-      filter: { property: 'object', value: 'page' },
-      page_size: 50,
-    });
+    const result = await listAccessiblePages(notion);
 
-    assert.equal(pageResponse.results.length, 2);
-    assert.equal(pageResponse.results[0].id, 'page-abc-123');
+    assert.equal(result.pages.length, 2);
+    assert.equal(result.pages[0].id, 'page-abc-123');
+    assert.equal(result.pages[0].title, 'Test Page');
+    assert.ok(result.pages[0].url);
 
-    const dbResponse = await notion.search({
-      filter: { property: 'object', value: 'database' },
-      page_size: 20,
-    });
-
-    assert.equal(dbResponse.results.length, 1);
-    assert.equal(dbResponse.results[0].id, 'db-xyz-789');
+    assert.equal(result.databases.length, 1);
+    assert.equal(result.databases[0].id, 'db-xyz-789');
+    assert.equal(result.databases[0].title, 'Test Database');
 
     assert.equal(calls.search.length, 2);
   });

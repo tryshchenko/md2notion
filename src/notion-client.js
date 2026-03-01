@@ -41,7 +41,6 @@ async function createPage(notion, parentPageId, title, blocks) {
 async function batchAppendBlocks(notion, pageId, blocks) {
   for (let i = 0; i < blocks.length; i += BATCH_SIZE) {
     const batch = blocks.slice(i, i + BATCH_SIZE);
-    console.log(`  Appending blocks ${i + 1}..${i + batch.length} of ${blocks.length}`);
     await notion.blocks.children.append({
       block_id: pageId,
       children: batch,
@@ -50,48 +49,34 @@ async function batchAppendBlocks(notion, pageId, blocks) {
 }
 
 /**
- * List pages accessible by the integration.
+ * List pages and databases accessible by the integration.
+ * Returns { pages: [...], databases: [...] }.
  */
 async function listAccessiblePages(notion) {
-  console.log('\nSearching for pages the integration can access...\n');
   const response = await notion.search({
     filter: { property: 'object', value: 'page' },
     page_size: 50,
   });
 
-  if (response.results.length === 0) {
-    console.log('  No pages found. The integration has no access to any pages.');
-    console.log('  Go to a Notion page \u2192 ... \u2192 Add connections \u2192 select your integration.');
-    return;
-  }
-
-  console.log(`  Found ${response.results.length} accessible pages:\n`);
-  for (const page of response.results) {
-    const title = page.properties?.title?.title?.[0]?.plain_text
+  const pages = response.results.map(page => ({
+    title: page.properties?.title?.title?.[0]?.plain_text
       || page.properties?.Name?.title?.[0]?.plain_text
-      || '(untitled)';
-    const id = page.id;
-    const url = page.url;
-    console.log(`  ${title}`);
-    console.log(`    ID:  ${id}`);
-    console.log(`    URL: ${url}`);
-    console.log();
-  }
+      || '(untitled)',
+    id: page.id,
+    url: page.url,
+  }));
 
-  // Also search for databases
   const dbResponse = await notion.search({
     filter: { property: 'object', value: 'database' },
     page_size: 20,
   });
-  if (dbResponse.results.length > 0) {
-    console.log(`\n  Also found ${dbResponse.results.length} accessible databases:\n`);
-    for (const db of dbResponse.results) {
-      const title = db.title?.[0]?.plain_text || '(untitled)';
-      console.log(`  [DB] ${title}`);
-      console.log(`    ID:  ${db.id}`);
-      console.log();
-    }
-  }
+
+  const databases = dbResponse.results.map(db => ({
+    title: db.title?.[0]?.plain_text || '(untitled)',
+    id: db.id,
+  }));
+
+  return { pages, databases };
 }
 
 module.exports = {

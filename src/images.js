@@ -55,9 +55,7 @@ function createImageHandler(notion, browser) {
     let pngBuffer;
     if (isSvg) {
       const pngFilename = filename.replace(/\.svg$/, '.png');
-      console.log(`  Converting ${filename} → ${pngFilename}...`);
       pngBuffer = await convertSvgToPng(imagePath, browser);
-      console.log(`  Uploading ${pngFilename} to Notion...`);
       const fileUploadId = await uploadPngToNotion(notion, pngBuffer, pngFilename);
       return {
         type: 'image',
@@ -72,7 +70,6 @@ function createImageHandler(notion, browser) {
     // PNG/JPG — read and upload directly
     const ext = require('path').extname(filename).toLowerCase();
     if (['.png', '.jpg', '.jpeg', '.gif', '.webp'].includes(ext)) {
-      console.log(`  Uploading ${filename} to Notion...`);
       const buffer = fs.readFileSync(imagePath);
       const contentType = ext === '.png' ? 'image/png'
         : ext === '.gif' ? 'image/gif'
